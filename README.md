@@ -12,7 +12,7 @@ Keepitsimple is a HTML5, JQuery, and PHP application that handle tasks.
 It is built upon [bootstrap](http://twitter.github.com/bootstrap).
 
 Tags: 
-`todo list, tada list, task, simple, clear, responsive, flexible, ajax, jquery, bootstrap`
+`todo list`, `tada list`, `task`, `simple`, `clear`, `responsive`, `flexible`, `ajax`, `jquery`, `bootstrap`
 
 Demo
 ----
