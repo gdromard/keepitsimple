@@ -1,16 +1,17 @@
-keep-it-simple(http://gdromard.github.com/keep-it-simple)
+[keep-it-simple](http://gdromard.github.com/keep-it-simple)
 ==============
 
 A clear, simple and responsive tasks management tool.
 
 keep-it-simple is a HTML5, JQuery, and PHP application that handle tasks. 
-It is built upon bootstrap(http://twitter.github.com/bootstrap).
+It is built upon [bootstrap](http://twitter.github.com/bootstrap).
 
 
 Demo
 ----
 
 Better than words, try it.
+
 A demo will be soon available.
 
 
