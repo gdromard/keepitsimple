@@ -1,9 +1,9 @@
-[keepitsimple](http://gdromard.github.com/keepitsimple)
+[Keepitsimple](http://gdromard.github.com/keepitsimple)
 ==============
 
 A clear, simple and responsive tasks management tool.
 
-keepitsimple is a HTML5, JQuery, and PHP application that handle tasks. 
+Keepitsimple is a HTML5, JQuery, and PHP application that handle tasks. 
 It is built upon [bootstrap](http://twitter.github.com/bootstrap).
 
 Tags
