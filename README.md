@@ -3,11 +3,16 @@
 
 A clear, simple and responsive tasks management tool.
 
+
+This task management tool is the easiest way to manage your todo lists for all of your projects. 
+Responsive and ergonomic, one screen is enough to handle task creation, modification, deletion. 
+Tasks can have different status (red, orange, green, gray and yellow), can be ordered, and are searchable.
+
 Keepitsimple is a HTML5, JQuery, and PHP application that handle tasks. 
 It is built upon [bootstrap](http://twitter.github.com/bootstrap).
 
-Tags
-
+Tags: 
+`todo list, tada list, task, simple, clear, responsive, flexible, ajax, jquery, bootstrap`
 
 Demo
 ----
