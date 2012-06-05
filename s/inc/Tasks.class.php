@@ -28,11 +28,15 @@ class Tasks {
 		if (!$this->content) {
 			switch($this->mode) {
 				case 'file':
-					$handle = fopen($this->filename, "r+");
+					if (is_writable($this->filename)) {
+						$handle = fopen($this->filename, "r+");
+					} else {
+						$handle = fopen($this->filename, "r");
+					}
 					if ($handle !== FALSE) {
 						$this->content = fread($handle, filesize($this->filename));
 						fclose($handle);
-			            if (strlen(trim($this->content)) == 0) $this->content = "[]";
+						if (strlen(trim($this->content)) == 0) $this->content = "[]";
 					}
 					break;
 				case 'db':
@@ -51,20 +55,22 @@ class Tasks {
 	function setContent($content, &$errorMessage) {
 		switch($this->mode) {
 			case 'file':
-				$handle = fopen($this->filename, 'w+');
+				$handle = FALSE;
+				if (is_writable($this->filename)) $handle = fopen($this->filename, 'w+');
 				if ($handle !== FALSE) {
 					if (fwrite($handle, $content) !== FALSE) {
 						Logger::debug("Sauvegarde realise avec succes");
 						if (fclose($handle) === FALSE) {
-							$errorMessage = __("ERROR: Enable to close file {0} ({1})", realpath($logfile), $p_sMessage);
+							$errorMessage = __("ERROR: Enable to close file {0}", realpath($this->filename));
 						} else {
 							return true;
 						}
 					} else {
-						$errorMessage = __("ERROR: file {0} is not writable ({1})", realpath($logfile), $p_sMessage);
+						$errorMessage = __("ERROR: file {0} is not writable", realpath($this->filename));
 					}
 				} else {
-					$errorMessage = __("ERROR: file {0} can not be open ({1})", realpath($logfile), $p_sMessage);
+					//$errorMessage = __("ERROR: file {0} can not be open", realpath($this->filename));
+					$errorMessage = __("ERROR: file {0} is not writable", basename($this->filename));
 				}
 				break;
 			case 'db':

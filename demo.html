@@ -92,7 +92,7 @@
 					$(link).parent('li').addClass('active');
 				}
 				var taskDiv = $(this);
-				taskDiv.removeClass('hidden').show().tasksLoad({url: 's/index.php', db: dbPath});
+				taskDiv.removeClass('hidden').show().tasksLoad({url: 's/index.php', db: dbPath, demo: true});
 				
 				$('#search-form-field').unbind('keyup');
 				$('#sort-by-description').unbind('click');

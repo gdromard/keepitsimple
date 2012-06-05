@@ -63,9 +63,12 @@ $(function() {
 			options.db = this.attr('data-db');
 			
 			if (!options.db) $('body').taskCreateErrorAlert('['+options.eventName+'] Parameter data-db was not found');
+			if ($(this).attr('data-mode') == 'demo') {
+				$('body').taskCreateInfoAlert('In demo mode the persistence is not available');
+				return this;
+			}
 			
 			return this.each(function() {
-				
 				$.getJSON(options.serverUrl, options)
 				.success(function(jsonData) {		
 					console.log('['+options.eventName+'] Event succeed');
@@ -88,6 +91,7 @@ $(function() {
 			// Load tasks
 			return this.each(function() {
 				var div = $(this);
+				if (options.demo) div.attr('data-mode', 'demo');
 				div.children('ul').detach();
 				div.addClass('tasks');
 				div.attr('data-db', options.db);
@@ -127,13 +131,13 @@ $(function() {
 				var ul = $(this).children('ul.tasks').first();
 				var sortBy = ul.attr('data-sortBy');
 				var sortType = ul.attr('data-sortType');
-				if (!field) field = sortBy;
-				var order = (sortType=='asc'?1:-1);
 				if (field == sortBy) {
-					order *= -1;
+					order = (sortType=='asc'?1:-1) * -1;
 					ul.attr('data-sortBy', field);
 					ul.attr('data-sortType', (order==1?'asc':'desc'));
 				} else {
+					if (!field) field = sortBy;
+					order = 1;
 					ul.attr('data-sortBy', field);
 					ul.attr('data-sortType', 'asc');
 				}
@@ -178,11 +182,14 @@ $(function() {
 
 			document.onkeydown = function(evt) {
 				evt = evt || window.event;
-			    if (evt.keyCode == 27) {
-			    	$(document.activeElement).escapepress(evt);
-			    } else if (evt.keyCode == 9) {
-			    	$(document.activeElement).tabpress(evt);
-			    }
+				if (evt.keyCode == 27) {
+					$(document.activeElement).escapepress(evt);
+				} else if (evt.keyCode == 9) {
+					$(document.activeElement).tabpress(evt);
+				} else if (evt.keyCode == 45) {
+					$('div.tasks:visible').insertpress(evt);
+				}
+			    
 			};
 			// Init tasks
 			return this.each(function() {
@@ -197,7 +204,7 @@ $(function() {
 					var addLi = $('<li class="add"/>').appendTo(addItems);
 					var addDiv = $('<div class="clickable"/>').appendTo(addLi);
 					addDiv.click(function() { $(this).taskShowCreationForm(); });
-					
+					$(this).insertpress(function() { addDiv.click(); });
 					
 					var items = $('<ul/>', {'class': 'tasks', 'data-sortBy': 'description', 'data-sortType': 'asc'});
 					items.appendTo($(this));
@@ -466,7 +473,16 @@ $(function() {
 				return this;
 			});
 		},
-		
+		insertpress: function(options) {
+			return this.each(function() {
+				if (typeof options == 'function') {
+					this.insertpress = options;
+				} else if (this.insertpress) {
+					this.insertpress(options);
+				}
+				return this;
+			});
+		},
 		tabpress: function(options) {
 			return this.each(function() {
 				if (typeof options == 'function') {
