@@ -4,8 +4,8 @@ include_once 'inc/Tasks.class.php';
 
 $db = http_get_param('db');
 $id = http_get_param('id');
-$desc = http_get_param('description');
-$info = http_get_param('info');
+$desc = urldecode(http_get_param('description'));
+$info = urldecode(http_get_param('info'));
 $status = http_get_param('status');
 
 $tasks = new Tasks(http_get_param('db'));

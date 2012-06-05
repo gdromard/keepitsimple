@@ -28,15 +28,17 @@ class Tasks {
 		if (!$this->content) {
 			switch($this->mode) {
 				case 'file':
-					if (is_writable($this->filename)) {
-						$handle = fopen($this->filename, "r+");
-					} else {
-						$handle = fopen($this->filename, "r");
+					if (!file_exists($this->filename) && is_writable($this->filename)) {
+						$handle = fopen($this->filename, "w");
+						if ($handle !== FALSE) fwrite($handle, "[]");
 					}
+					$handle = fopen($this->filename, "r");
 					if ($handle !== FALSE) {
 						$this->content = fread($handle, filesize($this->filename));
 						fclose($handle);
 						if (strlen(trim($this->content)) == 0) $this->content = "[]";
+					} else {
+						$this->content = "[]";
 					}
 					break;
 				case 'db':

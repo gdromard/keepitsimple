@@ -40,19 +40,19 @@ $(function() {
 		},
 		taskDescriptionChangedEvent: function(taskId, newDescription) {
 			return this.each(function() {
-				$(this).taskGenericEvent({serverUrl: 's/update.php', id: taskId, eventName: 'Update description Event', description: newDescription});
+				$(this).taskGenericEvent({serverUrl: 's/update.php', id: taskId, eventName: 'Update description Event', description: escape(newDescription)});
 				return this;
 			});
 		},
 		taskInfoChangedEvent: function(taskId, newInfo) {
 			return this.each(function() {
-				$(this).taskGenericEvent({serverUrl: 's/update.php', id: taskId, eventName: 'Update info Event', info: newInfo});
+				$(this).taskGenericEvent({serverUrl: 's/update.php', id: taskId, eventName: 'Update info Event', info: escape(newInfo)});
 				return this;
 			});
 		},
 		taskCreatedEvent: function(taskId, description) {
 			return this.each(function() {
-				$(this).taskGenericEvent({serverUrl: 's/create.php', id: taskId, description: description, eventName: 'Create Event'});
+				$(this).taskGenericEvent({serverUrl: 's/create.php', id: taskId, description: escape(description), eventName: 'Create Event'});
 				return this;
 			});
 		},
@@ -247,9 +247,9 @@ $(function() {
 					var title = STATUS[status].desc;
 					var div = $('<div/>', {'class': 'clickable status', title: title});
 					div.click(function(){ $(this).taskIncrementStatus(); });
-					var span = $('<span/>', {'class': 'clickable description', html: task.description});
+					var span = $('<span/>', {'class': 'clickable description', html: unescape(task.description)});
 					span.click(function(){ $(this).taskUpdateDescription(); });
-					var info = $('<span/>', {'class': 'clickable info', html: task.info});
+					var info = $('<span/>', {'class': 'clickable info', html: unescape(task.info)});
 					info.click(function(){ $(this).taskUpdateInfo(); });
 					var btn = $('<button/>', {'class': 'btn del', title: 'Delete this task', html: '&times;'});
 					btn.click(function(){ $(this).taskDelete(); });
@@ -299,7 +299,7 @@ $(function() {
 		taskUndoDelete: function(taskId) {
 			return this.each(function() {
 				$('li#'+taskId).slideDown('slow');
-				$(this).tasksRoot().taskRecoveredEvent(taskId);
+				$('li#'+taskId).tasksRoot().taskRecoveredEvent(taskId);
 				return this;
 			});
 		},
@@ -373,19 +373,19 @@ $(function() {
 				var li = span.parent('li');
 				var info = span.html();
 				var input = $('<input/>', { type: "text", 'class': 'info', name: "info", value: info});
+				li.addClass('editing');
 				span.hide();
 				input.appendTo(li);
 				input.focus();
 				input.blur(function() {
 					var input = $(this);
-					var li = input.parent('li');
-					var id = li.attr('id');
+					var id = input.parent('li').removeClass('editing').attr('id');
 					var span = $(input.siblings('span.info')[0]);
 					input.hide();
 					span.show();
 					span.html(input.val());
+					input.tasksRoot().taskInfoChangedEvent(id, input.val());
 					input.detach();
-					$(this).tasksRoot().taskInfoChangedEvent(id, input.val());
 				});
 				input.keypress(function(event) {
 					if(event.keyCode==13) {

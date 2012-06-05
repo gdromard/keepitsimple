@@ -4,7 +4,7 @@ include_once 'inc/Tasks.class.php';
 
 $db = http_get_param('db');
 $id = http_get_param('id');
-$description = http_get_param('description');
+$description = urldecode(http_get_param('description'));
 
 $tasks = new Tasks(http_get_param('db'));
 if (!$id) http_send_response(400, 'Bad Request: parameter ID is missing');
