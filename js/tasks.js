@@ -352,10 +352,10 @@ $(function() {
 				});
 				input.tabpress(function(event) {
 					if (event.shiftKey) {
-						$(this).parents('li').prev().children('span.description').click();
+						$(this).parents('li:visible').prev().children('span.description').click();
 						event.preventDefault();
 					} else {
-						$(this).parents('li').next().children('span.description').click();
+						$(this).parents('li:visible').next().children('span.description').click();
 						event.preventDefault();
 					}
 					return true;
