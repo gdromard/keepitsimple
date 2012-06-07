@@ -1,8 +1,12 @@
 <?php
 function http_get_param($name) {
-	return isset($_POST[$name])?$_POST[$name]:$_GET[$name];
+	return isset($_POST[$name])?utf8_urldecode($_POST[$name]):utf8_urldecode($_GET[$name]);
 }
-
+function utf8_urldecode($str) {
+	if ($str == null) return $str;
+	$str = preg_replace("/%u([0-9a-f]{3,4})/i","&#x\\1;",urldecode($str));
+	return html_entity_decode($str,null,'UTF-8');;
+}
 function http_send_response($status = 200, $body = '', $content_type = 'application/json') {
 	$status_header = 'HTTP/1.1 ' . $status . ' ' . getStatusCodeMessage($status);
 	header($status_header);
@@ -156,4 +160,10 @@ function __($msgid) {
 		}
 	}
 	return $msg;
+}
+
+class EmptyJSONObject {
+	public function toJSON() {
+		return json_encode($this);
+	}
 }

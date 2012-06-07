@@ -82,7 +82,7 @@ class Tasks {
 	}
 	
 	private function save(&$errorMessage) {
-		if ($this->tasks) return $this->setContent(json_encode($this->tasks), $errorMessage);
+		if ($this->tasks) return $this->setContent(str_replace("},", "},\n", json_encode($this->tasks)), $errorMessage);
 		$errorMessage = "Ooops its seams that the tasks have never been loaded";
 		return false;
 	}
@@ -116,9 +116,16 @@ class Tasks {
 	public function create($id, $description, &$errorMessage) {
 		$task = $this->get($id);
 		if (!$task) {
-			$task = json_decode(__(self::$JSON_TASK_TEMPLATE, $id, $description, "", $id, 0));
-			$this->tasks[] = $task;
-			return $this->save($errorMessage);
+			$jsonTask = __(self::$JSON_TASK_TEMPLATE, $id, "", "", $id, 0);
+			$task = json_decode($jsonTask);
+			if ($task) {
+				$task->description = $description;
+				$this->tasks[] = $task;
+				$errorMessage = __("Task {0}, successfully created (desc: {1}, info: {2}, status: {3}, deleted: {4})", $task->id, $task->description, $task->info, $task->status, $task->deleted);
+				return $this->save($errorMessage);
+			}
+			$errorMessage = "New task instanciation failed";
+			return false;
 		}
 		$errorMessage = "The task $id already exists";
 		return false;
@@ -129,22 +136,28 @@ class Tasks {
 		if ($task) {
 			$updated = false;
 			if (property_exists($new, 'description') && $task->description != $new->description) {
-				$task->description = $new->description;
+				$errorMessage .= "Description changed (from '".$task->description."', to '".$new->description."}'); ";
+				$task->description = utf8_encode($new->description);
 				$updated = true;
 			}
 			if (property_exists($new, 'info') && $task->info != $new->info) {
+				$errorMessage .= "Info changed (from '{$task->info}', to '{$new->info}'); ";
 				$task->info = $new->info;
 				$updated = true;
 			}
 			if (property_exists($new, 'status') && $task->status != $new->status) {
+				$errorMessage .= "Status changed (from '{$task->status}', to '{$new->status}'); ";
 				$task->status = $new->status;
 				$updated = true;
 			}
 			if ($updated) {
 				$task->modified = self::getCurrentTimestamp();
-				return $this->save($errorMessage);
+				if ($this->save($errorMessage)) {
+					return $task;
+				}
+				return false;
 			}
-			//$errorMessage .= "Nothing changed !";
+			$errorMessage .= "Nothing changed !";
 			return true;
 		}
 		$errorMessage = "The task $id has not been found";

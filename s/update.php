@@ -4,8 +4,8 @@ include_once 'inc/Tasks.class.php';
 
 $db = http_get_param('db');
 $id = http_get_param('id');
-$desc = urldecode(http_get_param('description'));
-$info = urldecode(http_get_param('info'));
+$desc = http_get_param('description');
+$info = http_get_param('info');
 $status = http_get_param('status');
 
 $tasks = new Tasks(http_get_param('db'));
@@ -16,6 +16,12 @@ else {
 	if ($desc!==NULL) $task->description = $desc;
 	if ($info!==NULL) $task->info = $info;
 	if ($status!==NULL) $task->status = $status;
-	if ($tasks->update($id, $task, $errorMessage)) http_send_response(200, '{"msg":"update succeeded"}');
+	$task = $tasks->update($id, $task, $errorMessage);
+	if ($task) {
+		$msg = new EmptyJSONObject();
+		$msg->msg = "update succeeded";
+		$msg->task = $task;
+		http_send_response(200, $msg->toJSON());
+	}
 	http_send_response(404, __('Update failed (due to: {0})', $errorMessage));
 }
