@@ -70,7 +70,8 @@ $(function() {
 			
 			return this.each(function() {
 				$.getJSON(options.serverUrl, options)
-				.success(function(jsonData) {		
+				.success(function(jsonData) {
+					if (jsonData.task) $('body').taskRefreshed(jsonData.task);
 					console.log('['+options.eventName+'] Event succeed');
 				})
 				.error(function(jqXHR, textStatus, errorThrown) {
@@ -210,27 +211,26 @@ $(function() {
 					items.appendTo($(this));
 	
 					// Display task
-					var totalItem = 0; doneItem = 0; doneWork = 0; totalWork = 0;
 					$.each(data, function(key, task) {
-						if (!task.deleted) {
-							items.taskInsertTask(task);
-							
-							if (task.info) {
-								var info = parseFloat(task.info);
-								if (info!=NaN && task.status != 3) { // Do not take skipped items into account 
-									++totalItem;
-									totalWork += info;
-									if (task.status == 2) { // Is the item DONE ?
-										++doneItem;
-										doneWork += info;
-									}
-								}
-							}
-						}
+						if (!task.deleted) items.taskInsertTask(task);
 					});
-					//console.log('[' + $(this).attr('id') + '] Etat d\'avancement: ' + doneWork + '/' + totalWork + ', ce qui fait ' + doneItem + '/' + totalItem + ' taches');
 				}
 				return this;
+			});
+		},
+		
+		taskRefreshed: function(task) {
+			return $('.tasks li#'+task.id).each(function() {
+				var li = $(this);
+				li.css('background-color', 'red');
+				li.attr('class', STATUS[task.status].classname);
+				li.attr('title', STATUS[task.status].desc);
+				li.children('span.description').val(unescape(task.description));
+				li.attr('data-deleted', task.deleted);
+				li.attr('data-status', task.status);
+				li.attr('data-modified', task.modified);
+				li.attr('data-info', unescape(task.info));
+				li.css('background-color', 'transparent');
 			});
 		},
 		
@@ -462,7 +462,9 @@ $(function() {
 			});
 			return root;
 		},
-		
+
+		// ---------------------------- Event functions ---------------------------- 
+
 		escapepress: function(options) {
 			return this.each(function() {
 				if (typeof options == 'function') {
@@ -492,6 +494,28 @@ $(function() {
 				}
 				return this;
 			});
+		},
+
+		// ---------------------------- Plugins ---------------------------- 
+
+		tasksStatistics: function() {
+			if (this.length==1 && this[0].nodeName != 'DIV') throw "This element is not a task container !"; 
+			var totalItem = 0; doneItem = 0; doneWork = 0; totalWork = 0;
+			$(this).find('ul.tasks li:visible').each(function() {
+				var task = $(this);
+				if (task.status() != 3) { // Do not take skipped items into account
+					++totalItem;
+					if (task.info()) {
+						var info = parseFloat(task.info());
+						if (info!=NaN) {
+							totalWork += info;
+							if (task.status() == 2) doneWork += info;
+						}
+					}
+				}
+				if (task.status() == 2) ++doneItem;
+			});
+			console.log('[' + $(this).attr('id') + '] Etat d\'avancement: ' + doneWork + '/' + totalWork + ', ce qui fait ' + doneItem + '/' + totalItem + ' taches');
 		}
 	});
 })(jQuery);
