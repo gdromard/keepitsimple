@@ -64,15 +64,8 @@ $(function() {
 			(this).find('li#'+options.id).attr('data-modified', ($.fn.currentTime()+""));
 			
 			if ($(this).attr('data-mode') == 'demo') {
-				if (options.eventName != 'Delete task Event' && $('div.alert:visible').length == 0) {
-					$('body').taskCreateInfoAlert('In demo mode the persistence is not available<br/><br/>'+
-							'<div class="well"><u>Use keys</u><ul>'+
-							'<li><b>INSERT</b> - So as create a task</li>'+
-							'<li><b>TAB (while editing)</b> - To edit next task</li>'+
-							'<li><b>MAJ+TAB (while editing)</b> - To edit prev task</li>'+
-							'<li><b>ESC</b> - To cancel edition</li>'+
-					'</ul></div>');
-				}
+				if (options.eventName != 'Delete task Event' && $('div.alert:visible').length == 0) 
+					$('body').taskCreateInfoAlert('In demo mode the persistence is not available');
 				return this;
 			}
 			if (!options.db) $('body').taskCreateErrorAlert('['+options.eventName+'] Parameter data-db was not found');
