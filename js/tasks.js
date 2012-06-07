@@ -205,6 +205,8 @@ $(function() {
 			};
 			// Init tasks
 			return this.each(function() {
+				$(this).children('ul').detach();
+
 				// Sort
 				data = $(options.data);
 				data = data.sort(function(obj1, obj2) { return (obj1.description < obj2.description ? -1 : (obj1.description > obj2.description ? 1 : 0)); });
