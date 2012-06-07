@@ -11,7 +11,8 @@ $status = http_get_param('status');
 $tasks = new Tasks(http_get_param('db'));
 if (!$id) http_send_response(400, 'Bad Request: parameter ID is missing');
 else {
-	$task = json_decode(__('{ "id": "{0}"}', $id));
+	$task = new EmptyJSONObject();
+	$task->id = $id;
 	if (!$task) http_send_response(404, __('Update failed (due to: {0})', "JSON Parse error in " . __FILE__ . " at line " . __LINE__));
 	if ($desc!==NULL) $task->description = $desc;
 	if ($info!==NULL) $task->info = $info;
