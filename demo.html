@@ -48,7 +48,7 @@
 					<ul class="nav">
 						<li class="active"><a id="load-mytasks" href="#">Demo</a></li>
 					</ul>
-					<form id="search-form" class="navbar-search pull-left">
+					<form id="search-form" class="navbar-search pull-left" onSubmit="return false">
 						<input id="search-form-field" type="text" class="search-query span2" placeholder="Search">
 					</form>
 					<ul class="nav pull-right">
@@ -92,7 +92,11 @@
 					$(link).parent('li').addClass('active');
 				}
 				var taskDiv = $(this);
-				taskDiv.removeClass('hidden').show().tasksLoad({url: 'db/tasks.json', db: dbPath, demo: true});
+				taskDiv
+					.removeClass('hidden')
+					.show()
+					.tasksInit({data: [{"id":"1333375510688","modified":1338370772480,"description":"Demo task","status":"0","deleted":0,"info":""}], demo: true });
+				//.tasksLoad({url: 'index.php', db: dbPath, demo: true});
 				
 				$('#search-form-field').unbind('keyup');
 				$('#sort-by-description').unbind('click');
@@ -143,7 +147,7 @@
 		
 		$('a#load-mytasks').click(function() {
 			$('div.container div.tasks').hide().parent('li').removeClass('active');
-			return $("div#mytasks").loadTasks(this, "db/tasks.json");
+			return $("div#mytasks").loadTasks(this, "<the relative PATH of the json DB file>");
 		});
 		$('a#load-mytasks').click();
 	});

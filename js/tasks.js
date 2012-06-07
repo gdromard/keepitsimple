@@ -34,19 +34,19 @@ $(function() {
 		},
 		taskStatusChangedEvent: function(taskId, newTaskStatus) {
 			return this.each(function() {
-				$(this).taskGenericEvent({serverUrl: 's/update.php', id: taskId, eventName: 'Update status Event', status: newTaskStatus});
+				$(this).taskGenericEvent({serverUrl: 's/update.php', id: taskId, status: newTaskStatus, eventName: 'Update status Event'});
 				return this;
 			});
 		},
 		taskDescriptionChangedEvent: function(taskId, newDescription) {
 			return this.each(function() {
-				$(this).taskGenericEvent({serverUrl: 's/update.php', id: taskId, eventName: 'Update description Event', description: escape(newDescription)});
+				$(this).taskGenericEvent({serverUrl: 's/update.php', id: taskId, description: escape(newDescription), eventName: 'Update description Event'});
 				return this;
 			});
 		},
 		taskInfoChangedEvent: function(taskId, newInfo) {
 			return this.each(function() {
-				$(this).taskGenericEvent({serverUrl: 's/update.php', id: taskId, eventName: 'Update info Event', info: escape(newInfo)});
+				$(this).taskGenericEvent({serverUrl: 's/update.php', id: taskId, info: escape(newInfo), eventName: 'Update info Event'});
 				return this;
 			});
 		},
@@ -61,13 +61,21 @@ $(function() {
 			var defaults = {serverUrl: 's/index.php', db: null, id: null, eventName: null };
 			var options =  $.extend(defaults, options);
 			options.db = this.attr('data-db');
+			(this).find('li#'+options.id).attr('data-modified', ($.fn.currentTime()+""));
 			
-			if (!options.db) $('body').taskCreateErrorAlert('['+options.eventName+'] Parameter data-db was not found');
 			if ($(this).attr('data-mode') == 'demo') {
-				$('body').taskCreateInfoAlert('In demo mode the persistence is not available');
+				if (options.eventName != 'Delete task Event' && $('div.alert:visible').length == 0) {
+					$('body').taskCreateInfoAlert('In demo mode the persistence is not available<br/><br/>'+
+							'<div class="well"><u>Use keys</u><ul>'+
+							'<li><b>INSERT</b> - So as create a task</li>'+
+							'<li><b>TAB (while editing)</b> - To edit next task</li>'+
+							'<li><b>MAJ+TAB (while editing)</b> - To edit prev task</li>'+
+							'<li><b>ESC</b> - To cancel edition</li>'+
+					'</ul></div>');
+				}
 				return this;
 			}
-			
+			if (!options.db) $('body').taskCreateErrorAlert('['+options.eventName+'] Parameter data-db was not found');
 			return this.each(function() {
 				$.getJSON(options.serverUrl, options)
 				.success(function(jsonData) {
@@ -177,9 +185,12 @@ $(function() {
 		
 		//pass the options variable to the function
 		tasksInit: function(options) {
+			if (this.nodeName == 'DIV') $('body').taskCreateErrorAlert("Unable to load task plugin on a non DIV element");
+
 			// Set the default values, use comma to separate the settings, example:
 			var defaults = { data: [] }
 			var options =  $.extend(defaults, options);
+			if (options.demo) $(this).attr('data-mode', 'demo');
 
 			document.onkeydown = function(evt) {
 				evt = evt || window.event;
@@ -194,27 +205,25 @@ $(function() {
 			};
 			// Init tasks
 			return this.each(function() {
-				if (this.nodeName == 'DIV') {
-					// Sort
-					data = $(options.data);
-					data = data.sort(function(obj1, obj2) { return (obj1.description < obj2.description ? -1 : (obj1.description > obj2.description ? 1 : 0)); });
-					
-					// Add task
-					var addItems = $('<ul/>', {'class': 'add'});
-					addItems.appendTo($(this));
-					var addLi = $('<li class="add"/>').appendTo(addItems);
-					var addDiv = $('<div class="clickable"/>').appendTo(addLi);
-					addDiv.click(function() { $(this).taskShowCreationForm(); });
-					$(this).insertpress(function() { addDiv.click(); });
-					
-					var items = $('<ul/>', {'class': 'tasks', 'data-sortBy': 'description', 'data-sortType': 'asc'});
-					items.appendTo($(this));
-	
-					// Display task
-					$.each(data, function(key, task) {
-						if (!task.deleted) items.taskInsertTask(task);
-					});
-				}
+				// Sort
+				data = $(options.data);
+				data = data.sort(function(obj1, obj2) { return (obj1.description < obj2.description ? -1 : (obj1.description > obj2.description ? 1 : 0)); });
+				
+				// Add task
+				var addItems = $('<ul/>', {'class': 'add'});
+				addItems.appendTo($(this));
+				var addLi = $('<li class="add"/>').appendTo(addItems);
+				var addDiv = $('<div class="clickable"/>').appendTo(addLi);
+				addDiv.click(function() { $(this).taskShowCreationForm(); });
+				$(this).insertpress(function() { addDiv.click(); });
+				
+				var items = $('<ul/>', {'class': 'tasks', 'data-sortBy': 'description', 'data-sortType': 'asc'});
+				items.appendTo($(this));
+				
+				// Display task
+				$.each(data, function(key, task) {
+					if (!task.deleted) items.taskInsertTask(task);
+				});
 				return this;
 			});
 		},
@@ -236,7 +245,7 @@ $(function() {
 		
 		taskInsertTask: function(task) {
 			// Set the default values, use comma to separate the settings, example:
-			var defaults = { id: (new Date().getTime()+""), modified: (new Date().getTime()+""), status: 0, deleted: 0, description: "", info: "" };
+			var defaults = { id: ($.fn.currentTime()+""), modified: ($.fn.currentTime()+""), status: 0, deleted: 0, description: "", info: "" };
 			var task =  $.extend(defaults, task);
 					
 			return this.each(function() {
@@ -274,7 +283,7 @@ $(function() {
 				input.focus();
 				input.blur(function() {
 					var input = $(this);
-					var taskId = new Date().getTime()+'';
+					var taskId = ($.fn.currentTime()+"");
 					if (input.val() != '') {
 						ul.taskInsertTask({id: taskId, description: input.val()});
 						$(this).tasksRoot().tasksSortBy();
@@ -461,6 +470,10 @@ $(function() {
 				}
 			});
 			return root;
+		},
+		
+		currentTime: function() {
+			return (new Date()).getTime();
 		},
 
 		// ---------------------------- Event functions ---------------------------- 
