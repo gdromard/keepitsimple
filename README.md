@@ -19,7 +19,7 @@ Demo
 
 Better than words, try it.
 
-A demo is available here for [english]http://gdromard.github.com/heepitsimple/demo-en.html), or here for [french]http://gdromard.github.com/heepitsimple/demo.html).
+A demo is available here for [english](http://gdromard.github.com/keepitsimple/demo-en.html), or here for [french](http://gdromard.github.com/keepitsimple/demo.html).
 
 
 Bug tracker
