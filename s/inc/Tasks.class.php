@@ -28,9 +28,13 @@ class Tasks {
 		if (!$this->content) {
 			switch($this->mode) {
 				case 'file':
-					if (!file_exists($this->filename) && is_writable($this->filename)) {
-						$handle = fopen($this->filename, "w");
-						if ($handle !== FALSE) fwrite($handle, "[]");
+					if (!file_exists($this->filename)) {
+						if (is_writable($this->filename)) {
+							$handle = fopen($this->filename, "w");
+							if ($handle !== FALSE) fwrite($handle, "[]");
+						} else {
+							return '[{"description":"File '.$this->filename.' does not exists !"}]';
+						}						
 					}
 					$handle = fopen($this->filename, "r");
 					if ($handle !== FALSE) {
