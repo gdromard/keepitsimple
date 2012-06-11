@@ -1,6 +1,6 @@
 <?php
 function http_get_param($name) {
-	return isset($_POST[$name])?utf8_urldecode($_POST[$name]):utf8_urldecode($_GET[$name]);
+	return isset($_POST[$name])?utf8_urldecode($_POST[$name]):(isset($_GET[$name])?utf8_urldecode($_GET[$name]):null);
 }
 function utf8_urldecode($str) {
 	if ($str == null) return $str;
