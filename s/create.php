@@ -9,6 +9,7 @@ $description = http_get_param('description');
 $tasks = new Tasks(http_get_param('db'));
 if (!$id) http_send_response(400, 'Bad Request: parameter ID is missing');
 else {
+	$message = null;
 	if ($tasks->create($id, $description, $errorMessage)) {
 		$msg = new EmptyJSONObject();
 		$msg->msg = "Creation succeeded";

@@ -17,6 +17,7 @@ else {
 	if ($desc!==NULL) $task->description = $desc;
 	if ($info!==NULL) $task->info = $info;
 	if ($status!==NULL) $task->status = $status;
+	$errorMessage = null;
 	$task = $tasks->update($id, $task, $errorMessage);
 	if ($task) {
 		$msg = new EmptyJSONObject();
