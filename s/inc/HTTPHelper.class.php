@@ -121,8 +121,8 @@ function getStatusCodeMessage($status) {
 
 
 /**
- * @param String $str La chaine à tester
- * @param String $sub Le début de la chaine
+ * @param String $str La chaine Ã  tester
+ * @param String $sub Le dÃ©but de la chaine
  * @return TRUE si $str commence par $sub.
  */
 function str_beginswith($str, $sub)
@@ -131,7 +131,7 @@ function str_beginswith($str, $sub)
 }
 
 /**
- * @param String $str La chaine à tester
+ * @param String $str La chaine Ã  tester
  * @param String $sub La fin de la chaine
  * @return TRUE si $str se termine par $sub.
  */
@@ -155,8 +155,8 @@ function __($msgid) {
 	if (function_exists("_")) $msg = _($msgid);
 	if (func_num_args() > 1) {
 		$args = func_get_args();
-		for ($i=0; $i<count($args); ++$i) {
-			$msg = str_replace('{'.$i.'}', $args[$i+1], $msg);
+		for ($i=1; $i<count($args); ++$i) {
+			$msg = str_replace('{'.($i-1).'}', $args[$i], $msg);
 		}
 	}
 	return $msg;
