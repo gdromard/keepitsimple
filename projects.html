@@ -185,17 +185,15 @@
 		
 			loadProjects: function() {
 				var jqxhr = $.getJSON("s/index.php", {db: 'db/projects.json'})
-				.success(function(jsonData) {		
+				.success(function(jsonData) {
+					jsonData = jsonData.sort(function(obj1, obj2) { return (obj1.id < obj2.id ? -1 : (obj1.id > obj2.id ? 1 : 0)); });
 					for(var i=0; i<jsonData.length;++i) {
-						console.log("TASK n°"+i+", desc: " + jsonData[i].description + " (" + jsonData[i].info + ")");
 						var li = $('<li/>');
 						var a = $('<a class="load" id="' + jsonData[i].info + '" href="#">' + jsonData[i].description + '</a>');
 						li.appendTo($('#load-buttons'));
 						a.appendTo(li);
 						$('<div id="' + jsonData[i].info + '" class="tasks span6"></div>').appendTo($('#alltasks'));
 						a.click(function() {
-							console.log(this);
-							console.log("You just clicked me ("+this.id+")");
 							$('div.container div.tasks').hide().parent('li').removeClass('active');
 							return $("div#"+this.id).loadTasks(this, "db/"+this.id+".json");
 						});
