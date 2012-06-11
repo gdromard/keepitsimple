@@ -28,8 +28,8 @@
 .done div{ background-image: url('../i/done.png'); }
 .add div{ background-image: url('../i/add.png'); width: 25px; height: 25px; }
 
-div.tasks input, div.tasks textarea { margin: 0; width: 93%; height: 20px; }
-div.tasks input, div.tasks textarea { margin: 0; width: 93%; height: 20px; }
+div.tasks input, div.tasks textarea { margin: 0; width: 90%; height: 20px; }
+div.tasks input, div.tasks textarea { margin: 0; width: 90%; height: 20px; }
 div.tasks input.info { width: 50px; }
 
 .del {
