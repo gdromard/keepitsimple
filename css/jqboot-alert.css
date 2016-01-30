@@ -1,0 +1,14 @@
+/** 
+ * JQuery / Bootstrap plugin to add alert message capabilities. 
+ * FileName: jqboot-alert.css 
+ * Date:     19/11/2015 
+ * Author:   Gabriel DROMARD 
+ * Require:  JQuery 1.11, Bootstrap 3.3, jqboot-alert.js
+ */
+
+.alert-warning, .alert-info, .alert-success, .alert-danger {
+	position: fixed;
+    right: 10px;
+    top: 10px;
+    z-index: 10000;
+}
