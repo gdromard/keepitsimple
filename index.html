@@ -37,6 +37,8 @@
 			#tasklist div span.status, #tasklist div label.description { font-size: 150%; }
 			#tasklist div label.record { margin-right: 5px; }
 			#tasklist div label.description { cursor: text; }
+			
+			#addtask-btn { color: gray; font-size: 22pt; font-weight: normal; margin-left: 14px; }
 		</style>
 		
 		<!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
@@ -161,7 +163,14 @@
 				<div class="row">
 					<div id="mytasks" class="tasks col-xs-12 col-md-8 col-lg-9">
 						<div class="row addtask">
-							<div class="col-xs-12"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span>&nbsp;<input id="addtask-input" name="addTask" value=""/></div>
+							<div class="col-xs-12">
+								<form class="form-horizontal">
+									<div class="form-group">
+										<label for="addtask-input" class="col-xs-1"><span id="addtask-btn" class="glyphicon glyphicon-plus" aria-hidden="true"></span></label>
+										<div class="col-xs-11"><input class="form-control" id="addtask-input" class="" name="addTask" value="" placeholder="Do ... When ... At ..."/></div>
+									</div>
+								</form>
+							</div>
 						</div>
 						<div id="tasklist" data-mode="quiet"></div>
 					</div>
@@ -301,13 +310,11 @@
 		
 		<script type="text/javascript">
 		
-		$(function() {
-			$('a.brand').click(function() {
-				window.location.reload();
-				return false;
+			$(function() {
+				$('a.brand').attr('href', document.location.href.replace(document.location.search, '?project='));
+				$.keepitsimple.init($('#tasklist'));
+				$('#addtask-input').focus();
 			});
-			$.keepitsimple.init($('#tasklist'));
-		});
 
 		
 		</script>
