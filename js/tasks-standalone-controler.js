@@ -47,14 +47,35 @@ var demotask = {
 		} else {
 			// Get project from URL
 			var index = self.location.search.indexOf('project=');
-			if (index>-1) this.project = self.location.search.substring(index+8);
+			if (index>-1) this.project = self.location.search.substring(index+8).replace(/&.*/, "");
 		}
 		$('#project').val(this.project);
     };
+
 	$.KeepItSimple.prototype = {
-		project: 'keepitsimple',
+		project: '',
+		serverType: 'php',
+		urlGet: 's/get.php',
+		urlSynchronize: 's/synchronize.php',
+		tasklist: null,
+		
 		getDB: function() {
 			return $.indexedDB(this.project).objectStore('tasks');
+		},
+		
+		/**
+		 * status: True: Green / False: Red
+		 */
+		setSaveStatus: function(status) {
+			if (status) {
+				$(".save-btn .glyphicon-floppy-remove").toggleClass('glyphicon-floppy-saved').toggleClass('glyphicon-floppy-remove');
+				$(".save-btn .red").toggleClass('red').toggleClass('green');
+				$(".save-btn.btn-danger").toggleClass('btn-success').toggleClass('btn-danger');
+			} else {
+				$(".save-btn .glyphicon-floppy-saved").toggleClass('glyphicon-floppy-saved').toggleClass('glyphicon-floppy-remove');
+				$(".save-btn .green").toggleClass('red').toggleClass('green');
+				$(".save-btn.btn-success").toggleClass('btn-success').toggleClass('btn-danger');
+			}
 		},
 		
 		init: function(element) {
@@ -111,9 +132,79 @@ var demotask = {
 				// --- Loading tasks from local indexedDB
 				$.keepitsimple.getDB().each(function(task) {
 					$.keepitsimple.tasklist.updateTaskUI(task.value);
+				}).then(function () {
+					$.keepitsimple.loadFromServer();
 				});
+
 			});
-		}
+		},
+		
+		/**
+		 * Get all tasks from the cloud (on server side)
+		 */
+		loadFromServer: function() {
+			// GET from server
+			if (this.serverType == 'php') {
+				console.log(this.urlGet, this.project);
+				console.log("taskGenericEvent mode", this.tasklist.data('mode'));
+				
+				if (this.tasklist.data('mode') == 'quiet') return;
+				else if (this.tasklist.data('mode') == 'demo') if ($('div.alert:visible').length == 0) $('body').alertInfo('In demo mode the persistence is not available');
+				
+				$.getJSON(this.urlGet, {db: this.project })
+				.success(function(jsonData) {
+					var ok = true;
+					$(jsonData).each(function() { $('body').saveTaskLocally(this); });
+					$.keepitsimple.setSaveStatus(true);
+					$('body').alertInfo('Tasks successfully loaded from Server');
+				})
+				.error(function(jqXHR, textStatus, errorThrown) {
+					$('body').alertError('[Get tasks event] Event FAILED');
+					console.log("textStatus: " + textStatus + ", errorThrown: " + errorThrown);
+				});
+			} // end of server GET
+		},
+		
+
+		/**
+		 * Save all tasks into the cloud (on server side)
+		 */
+		saveToServer: function(event) {
+			var tasks = [];
+			$.keepitsimple.getDB().each(function(item) {
+				tasks.push(item.value);
+			}).done(function() {
+				console.log(tasks);
+				console.log($.keepitsimple.serverType);
+				// PUSH to server
+				
+				if ($.keepitsimple.serverType == 'php') {
+					console.log($.keepitsimple.urlSynchronize, $.keepitsimple.project);
+					
+					console.log("taskGenericEvent mode", $.keepitsimple.tasklist.data('mode'));
+					if ($.keepitsimple.tasklist.attr('data-mode') == 'quiet') return;
+					else if ($.keepitsimple.tasklist.attr('data-mode') == 'demo') if ($('div.alert:visible').length == 0) $('body').alertInfo('In demo mode the persistence is not available');
+					var  data = {db: $.keepitsimple.project, tasks: JSON.stringify(tasks).replace(/\[/, "[\n\t").replace(/},{/g, "},\n\t{").replace(/}\]/g, "}\n]") };
+				    // Send the request
+				    $.ajax({
+				    	type: 'POST',
+				    	url: $.keepitsimple.urlSynchronize, 
+				    	dataType: 'json',
+				    	//async: false,
+				    	data: data,
+				    	success: function(response) {
+				    		console.log(response);
+				    		$.keepitsimple.setSaveStatus(true);
+				    		if ($('div.alert:visible').length == 0) $('body').alertInfo('Task successfully saved to server'); 
+				    	},
+				    	error: function(jqXHR, textStatus, errorThrown) {
+							$('body').alertError('[Get tasks event] Event FAILED');
+							console.log("textStatus: " + textStatus + ", errorThrown: " + errorThrown);
+						} 
+				    });
+				} // end of server PUSH
+			});
+		},
 	};
 	$.keepitsimple = new $.KeepItSimple();
 
@@ -186,7 +277,9 @@ var demotask = {
 					task.description = $('#editTaskModal #description').val();
 					task.info = $('#editTaskModal #info').val();
 					task.status = $('#editTaskModal #status').val();
+					task.modified = $.fn.currentTime();
 					var spent = $('#editTaskModal #spentTime').val();
+					
 					if (spent != 'na') {
 						if (spent == 'clear') {
 							task.start = 0;
@@ -307,39 +400,44 @@ var demotask = {
 		   return this;
 		},
 		
-		
+
 		/**
 		 * Save a task locally (into browser IndexedDB)
 		 * @param taskToBeSaved  the task to be stored into local DB.
 		 */
 		saveTaskLocally: function(taskToBeSaved) {
+			$.keepitsimple.setSaveStatus(false);
 			$.keepitsimple.getDB().get(taskToBeSaved.id).then(function (task) {
 				if (task == undefined) {
 					taskToBeSaved.modified = $.fn.currentTime();
 					// Création
 					$.keepitsimple.getDB().add(taskToBeSaved).then(function (id) {
 						$('#tasklist').updateTaskUI(taskToBeSaved);
-						//$('#tasklist').taskCreatedEvent(task.id, task.status);
 					}, function (err, e) {
 						console.error(err, e);
 					});
 				} else {
-					// Modification	
-					task =  $.extend(taskToBeSaved, task.value);
-					task.modified = $.fn.currentTime();
-					console.log("Saving locally task: ", task);
-					// Updating object into indexedDB
-					$.keepitsimple.getDB().put(task).then(function (id) {
-						$('#tasklist').updateTaskUI(task);
-						//$.fn.getTasksContainer().taskChangedEvent(task.id, task.status);
-					}, function (err, e) {
-						console.error(err, e);
-					});
+					if (taskToBeSaved.modified >= task.modified) {
+						// Modification	
+						task =  $.extend(taskToBeSaved, task.value);
+						console.log("Saving locally task: ", task);
+						// Updating object into indexedDB
+						$.keepitsimple.getDB().put(task).then(function (id) {
+							$('#tasklist').updateTaskUI(task);
+						}, function (err, e) {
+							console.error(err, e);
+						});
+					} else {
+						$('body').alertWarning("Local task "+taskToBeSaved.id+" is newer than the one you're loading !!");
+						console.warn("Local task "+taskToBeSaved.id+" is newer than the one you're loading !!", $("#"+taskToBeSaved.id), taskToBeSaved.modified, task.modified);
+						$.keepitsimple.setSaveStatus(false);
+					}
 				}
 			}, function (err, e) {// if error while getting task -> Create the default task
 				console.error(err, e);
 			});
 		},
+
 		
 
 		/**
@@ -389,6 +487,15 @@ var demotask = {
 			// Increment records every seconds ...
 			setInterval(function() { $('div.task label.record').incrementRecord(); }, 1000);
 
+			// Unbinding des evennements
+			$('#search-form-field').unbind('keyup');
+			$('#sort-by-description').unbind('click');
+			$('#sort-by-info').unbind('click');
+			$('#sort-by-id').unbind('click');
+			$('#sort-by-modified').unbind('click');
+			$('#sort-by-status').unbind('click');
+			$('.save-btn').unbind('click');
+
 			// Register createTask event
 			$('#addtask-input').on('keypress', function (e) {
 			    e.preventDefault;
@@ -401,17 +508,21 @@ var demotask = {
 			});
 								
 			// Register buttons events :
-			$('#exporterModal .saveBtn').on('click', function() {
+			$('.save-btn').unbind('click').on('click', function() {
+				$.keepitsimple.saveToServer(this);
+			});
+			$('#exporterModal .saveBtn').unbind('click').on('click', function() {
 				var tasks = JSON.parse($('#exporterModal .modal-body textarea').val());
 				$(tasks).each(function() {
 					$('body').saveTaskLocally(this);
 				});
 			});
-			$('#editTaskModal .saveBtn').on('click', function() {
+			$('#editTaskModal .saveBtn').unbind('click').on('click', function() {
 				$('body').saveEditedTaskUI();
 			});
+			
 			// Register modal events :
-			$('#exporterModal').on('shown.bs.modal', function() {
+			$('#exporterModal').unbind('click').on('shown.bs.modal', function() {
 				console.log("Starting extraction of tasks");
 				$('#exporterModal .modal-body textarea').val("[");
 				$.keepitsimple.getDB().each(function(task) {
@@ -420,23 +531,16 @@ var demotask = {
 					$('#exporterModal .modal-body textarea').val($('#exporterModal .modal-body textarea').val().replace(/,$/, "") + "\n]" );
 				});
 			});
-
-			// Unbinding des evennements
-			$('#search-form-field').unbind('keyup');
-			$('#sort-by-description').unbind('click');
-			$('#sort-by-info').unbind('click');
-			$('#sort-by-id').unbind('click');
-			$('#sort-by-modified').unbind('click');
-			$('#sort-by-status').unbind('click');
 			
-			// Binding des evennements
-			$('#sort-by-description').click(function() { $('#tasklist').tasksSortBy('description'); return false; });
-			$('#sort-by-info'       ).click(function() { $('#tasklist').tasksSortBy('info');        return false; });
-			$('#sort-by-id'         ).click(function() { $('#tasklist').tasksSortBy('id');          return false; });
-			$('#sort-by-modified'   ).click(function() { $('#tasklist').tasksSortBy('modified');    return false; });
-			$('#sort-by-status'     ).click(function() { $('#tasklist').tasksSortBy('status');      return false; });
+			// Register sorting
+			$('#sort-by-description').unbind('click').on('click', function() { $('#tasklist').tasksSortBy('description'); return false; });
+			$('#sort-by-info'       ).unbind('click').on('click', function() { $('#tasklist').tasksSortBy('info');        return false; });
+			$('#sort-by-id'         ).unbind('click').on('click', function() { $('#tasklist').tasksSortBy('id');          return false; });
+			$('#sort-by-modified'   ).unbind('click').on('click', function() { $('#tasklist').tasksSortBy('modified');    return false; });
+			$('#sort-by-status'     ).unbind('click').on('click', function() { $('#tasklist').tasksSortBy('status');      return false; });
 
-			$('#search-form-field').keyup(function() {
+			// Register filter field
+			$('#search-form-field').unbind('keyup').on('keyup', function() {
 				$('#tasklist div.row').each(function() {
 					$(this).toggle($(this).text().toUpperCase().indexOf($('#search-form-field').val().toUpperCase()) > -1);
 				});
@@ -484,12 +588,18 @@ var demotask = {
 				return this;
 			});
 		},
+		taskSynchronizeEvent: function(alltasks) {
+			return this.each(function() {
+				$(this).taskGenericEvent({serverUrl: 's/synchronize.php', tasks: alltasks, eventName: 'Synchronize Event'});
+				return this;
+			});
+		},
 
 		taskGenericEvent: function(options) {
-			var defaults = {serverUrl: null, db: null, id: null, eventName: null };
-			var options =  $.extend(defaults, options);
-			options.db = this.attr('data-db');
-			(this).find('li#'+options.id).attr('data-modified', ($.fn.currentTime()+""));
+			var options =  $.extend({serverUrl: null, db: $.keepitsimple.getDB(), id: null, eventName: null }, options);
+
+			console.log("taskGenericEvent", options);
+			console.log("taskGenericEvent mode", $(this).attr('data-mode'));
 			
 			if ($(this).attr('data-mode') == 'quiet') {
 				return this;
@@ -499,6 +609,7 @@ var demotask = {
 				return this;
 			}
 			if (!options.db) $('body').alertError('['+options.eventName+'] Parameter data-db was not found');
+
 			return this.each(function() {
 				$.getJSON(options.serverUrl, options)
 				.success(function(jsonData) {

@@ -16,7 +16,7 @@ class Tasks {
 	
 	public function __construct($db = 'tasks', $mode = 'file') {
 		if ($mode === 'db') $this->mode = 'db';
-		if ($db != null) $this->filename = $db;
+		if (isset($db)) $this->filename = 'db/'.$db.'.json';
 	}
 
 	public function getTasks() {
@@ -31,7 +31,10 @@ class Tasks {
 					if (!file_exists($this->filename)) {
 						$handle = @fopen($this->filename, "w");
 						if ($handle !== FALSE) fwrite($handle, "[]");
-						else return '[{"description":"File '.$this->filename.' does not exists !"}]';				
+						else {
+							//$errorMessage = __("ERROR: file {0} does not exists !", realpath(".") ."/". $this->filename);
+							return '[{"description":"File '. realpath(".") ."/". $this->filename.' does not exists !"}]';
+						}
 					}
 					$handle = fopen($this->filename, "r");
 					if ($handle !== FALSE) {
@@ -59,21 +62,26 @@ class Tasks {
 		switch($this->mode) {
 			case 'file':
 				$handle = FALSE;
-				if (is_writable($this->filename)) $handle = fopen($this->filename, 'w+');
-				if ($handle !== FALSE) {
-					if (fwrite($handle, $content) !== FALSE) {
-						Logger::debug("Sauvegarde realise avec succes");
-						if (fclose($handle) === FALSE) {
-							$errorMessage = __("ERROR: Enable to close file {0}", realpath($this->filename));
+				if (!file_exists($this->filename) || is_writable($this->filename)) {
+					$handle = fopen($this->filename, 'w+');
+					if ($handle !== FALSE) {
+						if (fwrite($handle, $content) !== FALSE) {
+							Logger::debug("Sauvegarde realise avec succes");
+							if (fclose($handle) === FALSE) {
+								$errorMessage = __("ERROR: Enable to close file {0}", realpath($this->filename));
+							} else {
+								return true;
+							}
 						} else {
-							return true;
+							$errorMessage = __("ERROR: file {0} is not writable", realpath($this->filename));
 						}
 					} else {
-						$errorMessage = __("ERROR: file {0} is not writable", realpath($this->filename));
+						$errorMessage = __("ERROR: file {0} can not be open", realpath('.') . '/' . $this->filename);
+						//$errorMessage = __("ERROR: file {0} is not writable", realpath('.') . '/' . $this->filename);
 					}
 				} else {
 					//$errorMessage = __("ERROR: file {0} can not be open", realpath($this->filename));
-					$errorMessage = __("ERROR: file {0} is not writable", basename($this->filename));
+					$errorMessage = __("ERROR: file {0} is not writable", realpath('.') . '/' . $this->filename);
 				}
 				break;
 			case 'db':

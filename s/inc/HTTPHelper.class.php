@@ -10,7 +10,7 @@ function utf8_urldecode($str) {
 function http_send_response($status = 200, $body = '', $content_type = 'application/json') {
 	$status_header = 'HTTP/1.1 ' . $status . ' ' . getStatusCodeMessage($status);
 	header($status_header);
-	header('Content-type: ' . $content_type);
+	header('Content-type: ' . $content_type . '; charset=UTF-8');
 	header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
 	header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 	Header('Pragma: no-cache');
@@ -52,7 +52,7 @@ function http_send_response($status = 200, $body = '', $content_type = 'applicat
 		$body = '<!DOCTYPE HTML>
 		<html>
 		<head>
-		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 		<title>' . $status . ' ' . $statusCodeMsg . '</title>
 		</head>
 		<body>

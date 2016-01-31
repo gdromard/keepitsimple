@@ -27,6 +27,9 @@
 			.modal.modal-wide .modal-body pre { overflow: auto; max-height: calc(100vh - 250px); }
 			.modal.modal-wide .modal-body textarea { overflow: auto; width: 100%; height: 100%; min-height: 300px; max-height: calc(100vh - 250px); font: 10pt/1.25 'Helvetica Neue', Arial, 'Liberation Sans', FreeSans, sans-serif; }
 			
+			.green { color: green; }
+			.red { color: red; }
+			
 			/* BRANDING: *
 			body { background-image: url('http://intranet.latecoere.gl.local/images_latecoere/background.png'); background-repeat: repeat;}
 			div.header-brand { background-color: #003366; }
@@ -98,12 +101,15 @@
 
 			        <ul class="nav navbar-nav navbar-right">
 		        		<li>
-							<a href="#" role="button" data-toggle="modal" data-target="#exporterModal">
-								Import/Export
-							</a>
+							<a href="#" class="btn-default" role="button" data-toggle="modal" data-target="#exporterModal">Import/Export</a>
+						</li>
+		        		<li>
+							<a href="#" class="save-btn btn-default" role="button"><span class="green"><span class="glyphicon glyphicon-floppy-saved" aria-hidden="true"> </span> Save</span></a>
+							<!-- glyphicon-floppy-removed red -->
 						</li>
 		        		<li class="dropdown">
 							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+								<span class="glyphicon glyphicon-sort-by-alphabet" aria-hidden="true"></span>
 								Trier par <span class="caret"></span>
 							</a>
 							<ul class="dropdown-menu">
@@ -165,18 +171,24 @@
 					<div id="mytasks" class="tasks col-xs-12 col-md-8 col-lg-9">
 						<div class="row addtask">
 							<div class="col-xs-12">
-								<form class="form-horizontal">
+								<form class="form-horizontal" onSubmit="return false;">
 									<div class="form-group">
-										<label for="addtask-input" class="col-xs-1"><span id="addtask-btn" class="glyphicon glyphicon-plus" aria-hidden="true"></span></label>
+										<label for="addtask-input" class="col-xs-1 hidden-xs"><span id="addtask-btn" class="glyphicon glyphicon-plus" aria-hidden="true"></span></label>
 										<div class="col-xs-11"><input class="form-control" id="addtask-input" class="" name="addTask" value="" placeholder="Do ... When ... At ..."/></div>
 									</div>
 								</form>
 							</div>
 						</div>
-						<div id="tasklist" data-mode="quiet"></div>
+						<div id="tasklist" data-mode="server"></div>
+						<div class="row" style="text-align: right">
+							<br/>
+							<div class="col-xs-12">
+								<a href="#" class="save-btn btn btn-success" role="button"><span class="glyphicon glyphicon-floppy-saved" aria-hidden="true"> </span> Save</a>
+							</div>
+						</div>
 					</div>
 					
-					<div id="tips" class="col-xs-12 col-md-4 col-lg-3">
+					<div id="tips" class="hidden-xs hidden-md col-xs-12 col-md-4 col-lg-3">
 						<div class="well">
 							<h2>TIPS</h2>
 							Shorcuts:
@@ -310,10 +322,21 @@
 		</script>
 		
 		<script type="text/javascript">
+
+			function getProjectUrl(project) {
+				var url = document.location.href;
+				if (document.location.search.length > 0) url = url.replace(document.location.search, '');
+				if (url.indexOf('#') > -1) url = url.substring(0, url.indexOf('#'));
+				return url + '?project='+project;
+			}
+			function gotoProject(project) {
+				document.location.href = getProjectUrl(project);
+				return false;
+			}
 		
 			$(function() {
-				$('a.brand').attr('href', document.location.href.replace(document.location.search, '?project='));
 				$.keepitsimple.init($('#tasklist'));
+				$('a.brand').attr('href', getProjectUrl(''));
 				$('#addtask-input').focus();
 			});
 
