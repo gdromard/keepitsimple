@@ -257,9 +257,11 @@ var demotask = {
 					$('#editTaskModal #taskId').val(task.id);
 					$('#editTaskModal #description').val(task.description);
 					$('#editTaskModal #info').val(task.info);
+					$('#editTaskModal #viewInfo').html(markdown.toHTML(task.info, 'Maruku'));
 					$('#editTaskModal #status').val(task.status);
 					$('#editTaskModal #spentTime').val('na');
 				});
+				$('#editTaskModal a[href="#viewInfo"]').tab('show');
 				$('#editTaskModal').modal();
 				return this;
 			});
@@ -394,6 +396,7 @@ var demotask = {
 			$.keepitsimple.getDB().add(task).then(function (id) {
 				console.info('Task Created: ', task);
 				$('#tasklist').updateTaskUI(task);
+	    		$.keepitsimple.setSaveStatus(false);
 		   }, function (err, e) {
 			   console.error(err, e);
 		   });
@@ -497,7 +500,7 @@ var demotask = {
 			$('.save-btn').unbind('click');
 
 			// Register createTask event
-			$('#addtask-input').on('keypress', function (e) {
+			$('#addtask-input').unbind('keypress').on('keypress', function (e) {
 			    e.preventDefault;
 			    if (e.which == 13) {
 			        if ($(this).val() != '') {
@@ -505,6 +508,10 @@ var demotask = {
 				        $(this).val("");
 			        }
 			    }
+			});
+			$('#info').unbind('keyup').on('keyup', function() {
+				$('#viewInfo').html(markdown.toHTML($('#info').val(), 'Maruku'));
+				console.log(markdown.toHTML($(this).val(), 'Maruku'));
 			});
 								
 			// Register buttons events :

@@ -30,6 +30,11 @@
 			.green { color: green; }
 			.red { color: red; }
 			
+			.tab-content { border: 1px solid #ccc; border-radius: 4px; box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset; min-height: 80px; }
+			.nav-tabs { border: 0px; }
+			#viewInfo { margin: 5px; }
+			.tab-content textarea { border: 0px; }
+			
 			/* BRANDING: *
 			body { background-image: url('http://intranet.latecoere.gl.local/images_latecoere/background.png'); background-repeat: repeat;}
 			div.header-brand { background-color: #003366; }
@@ -237,7 +242,24 @@
 							</div>
 							<div class="form-group">
 								<label for="info"><span class="glyphicon glyphicon-info-sign"></span> Information</label>
-								<textarea class="form-control" id="info" placeholder="Enter information"></textarea>
+								<!-- Nav tabs -->
+								<ul class="nav nav-tabs" role="tablist">
+									<li role="presentation" class="active"><a href="#viewInfo" aria-controls="viewInfo" role="tab" data-toggle="tab"><span class="glyphicon glyphicon-info-sign"></span> Information</a></li>
+									<li role="presentation"><a href="#editInfo" aria-controls="editInfo" role="tab" data-toggle="tab"><span class="glyphicon glyphicon-edit"></span></a></li>
+								</ul>
+								<div class="tab-content">
+								  <div role="tabpanel" class="tab-pane fade in active" id="viewInfo">
+								  <!-- 
+									<div class="panel panel-default">
+	  									<div class="panel-body" id="viewInfo">
+										</div>
+									</div>
+								   -->
+								  </div>
+								  <div role="tabpanel" class="tab-pane fade" id="editInfo">
+									<textarea class="form-control" id="info" placeholder="Enter information" rows="8"></textarea>
+								  </div>
+								</div>
 							</div>
 							<div class="form-group">
 								<label for="status"><span class="glyphicon glyphicon-flag"></span> Status</label>
@@ -312,6 +334,7 @@
 		
 		<script type='text/javascript' src='js/jqboot-alert.js'></script>
 		<script type='text/javascript' src='js/tasks-standalone-controler.js'></script>
+		<script type='text/javascript' src='js/markdown.js'></script>
 		<!--
 		<script type='text/javascript' src='http://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.0.3/js.cookie.min.js'></script>
 		<script type='text/javascript' src='http://highlightjs.org/static/highlight.pack.js'></script>
