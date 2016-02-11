@@ -525,6 +525,11 @@
     case "strike":
       jsonml[ 0 ] = "del";
       break;
+    case "checkbox":
+      jsonml[ 0 ] = "input";   // set imput html element
+      attrs.type = "checkbox"; // set input type attribute to checkbox
+      jsonml[ 2 ] = " ";       // remove [x]
+      break;
     case "underline":
       jsonml[ 0 ] = "ins";
       break;
@@ -1040,6 +1045,17 @@
             break;
           } // loose_search
 
+	  // handle tasks lists
+	  if (list[1][1] && list[1][1][0] === "checkbox") {
+		list.splice(1, 0, { "class": "task-list" });
+		var i=2;
+		for (; i<list.length; ++i) {
+			if (list[i][0] == "listitem") {
+				list[i].splice(1, 0, { "class": "task-list-item" });
+			}
+		}
+	  }
+
           return ret;
         };
       })(),
@@ -1308,6 +1324,16 @@
           return [ consumed, link ];
         }
 
+	// [ ] or [x]      -----          Handle tasks list
+	m = String(children).match( /^(\s|x)$/ );
+	if ( m ) {
+		consumed += 1;
+		attrs = { disabled: "", "class": "task-list-item-checkbox" };
+		if (m[ 0 ] == "x") attrs.checked = "";
+		var checkbox = [ "checkbox", attrs ].concat( children );
+		return [ consumed, checkbox ];
+	}
+		
         // [Alt text][id]
         // [Alt text] [id]
         m = text.match( /^\s*\[(.*?)\]/ );
